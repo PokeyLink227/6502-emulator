@@ -28,9 +28,10 @@ Instr opcode_lookup[0x100] = {
 
 unsigned short pc;
 byte acc, x, y, stkptr, status;
-//byte memory[0xFFFF];
+byte memory[0x10000];
 
 Instr cur_instr;
+unsigned short data_adr;
 
 void set_flag(byte flag, byte b) {
     if (b) {
@@ -45,7 +46,123 @@ byte get_flag(byte flag) {
     return status & flag;
 }
 
+byte read(unsigned short adr) {
+    if (adr >= 0x0000 && adr <= 0xFFFF) {
+        return memory[adr];
+    } else {
+        return 0x00;
+    }
+}
+
+byte write(unsigned short adr, byte data) {
+    if (adr >= 0x0000 && adr <= 0xFFFF) {
+        memory[adr] = data;
+        return 0x01;
+    } else {
+        return 0x00;
+    }
+}
+
 byte set_address_mode(byte mode) {
+    unsigned short low, high;
+    switch (mode) {
+    case ADR_NONE: {
+        return 0;
+    }
+
+    case ADR_ACC: {
+        return 0;
+    }
+
+    case ADR_IMM: {
+        data_adr = pc++;
+        return 0;
+    }
+
+    case ADR_ZP: {
+        data_adr = read(pc++);
+        return 0;
+    }
+
+    case ADR_ZPX: {
+        data_adr = (x + read(pc++)) & 0x00FF;
+        return 0;
+    }
+
+    case ADR_ZPY: {
+        data_adr = (y + read(pc++)) & 0x00FF;
+        return 0;
+    }
+
+    case ADR_ABS: {
+        low = read(pc++);
+        high = read(pc++);
+        data_adr = (high << 8) | low;
+        return 0;
+    }
+
+    case ADR_ABSX: {
+        low = read(pc++);
+        high = read(pc++);
+        data_adr = (high << 8) | low;
+        data_adr += x;
+        return ((data_adr & 0xFF00) != (high << 8);
+    }
+
+    case ADR_ABSY: {
+        low = read(pc++);
+        high = read(pc++);
+        data_adr = (high << 8) | low;
+        data_adr += y;
+        return ((data_adr & 0xFF00) != (high << 8);
+    }
+
+    case ADR_IMPL: {
+        return 0;
+    }
+
+    case ADR_REL: {
+        return 0;
+    }
+
+    case ADR_INDX: {
+        low = read(pc++);
+        low = (low + x) & 0x00FF;
+        data_adr = low;
+
+        low = read(data_adr++);
+        high = read(data_adr);
+        data_adr = (high << 8) | low;
+        return 0;
+    }
+
+    case ADR_INDY: {
+        return 0;
+    }
+
+    case ADR_INDABS: {
+        low = read(pc++);
+        high = read(pc++);
+        data_adr = (high << 8) | low;
+
+        /*
+            needed in order to emulate a bug that caused invalid memory addresses to be read
+            when reading across page boundries wrap rather than cross
+        */
+        if (low == 0x00FF) {
+            low = read(data_adr);
+            high = read(data_adr & 0xFF00);
+            data_adr = (high << 8) | low;
+        } else {
+            low = read(data_adr++);
+            high = read(data_adr);
+            data_adr = (high << 8) | low;
+        }
+        return 0;
+    }
+
+    }
+
     return 0; // num extra cycles
 }
 
@@ -255,7 +372,6 @@ byte execute_instr(byte instr) {
         x = acc;
         set_flag(ZERO, x == 0x00);
         set_flag(NEGATIVE, x & 0x80);
-        pc++;
         return 0;
     }
 
@@ -263,7 +379,6 @@ byte execute_instr(byte instr) {
         y = acc;
         set_flag(ZERO, y == 0x00);
         set_flag(NEGATIVE, y & 0x80);
-        pc++;
         return 0;
     }
 
@@ -271,7 +386,6 @@ byte execute_instr(byte instr) {
         x = stkptr;
         set_flag(ZERO, x == 0x00);
         set_flag(NEGATIVE, x & 0x80);
-        pc++;
         return 0;
     }
 
@@ -279,7 +393,6 @@ byte execute_instr(byte instr) {
         acc = x;
         set_flag(ZERO, acc == 0x00);
         set_flag(NEGATIVE, acc & 0x80);
-        pc++;
         return 0;
     }
 
@@ -292,7 +405,6 @@ byte execute_instr(byte instr) {
         acc = y;
         set_flag(ZERO, acc == 0x00);
         set_flag(NEGATIVE, acc & 0x80);
-        pc++;
         return 0;
     }
     }
