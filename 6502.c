@@ -106,7 +106,8 @@ byte set_address_mode(byte mode) {
         high = read(pc++);
         data_adr = (high << 8) | low;
         data_adr += x;
-        return ((data_adr & 0xFF00) != (high << 8);
+        /* checks if page boundry was crossed */
+        return ((data_adr & 0xFF00) != (high << 8));
     }
 
     case ADR_ABSY: {
@@ -114,14 +115,16 @@ byte set_address_mode(byte mode) {
         high = read(pc++);
         data_adr = (high << 8) | low;
         data_adr += y;
-        return ((data_adr & 0xFF00) != (high << 8);
+        return ((data_adr & 0xFF00) != (high << 8));
     }
 
     case ADR_IMPL: {
         return 0;
     }
 
-    case ADR_REL: {
+    case ADR_REL: { /* additional cycles need to be calculated per instruction */
+        data_adr = read(pc++);
+        if (data_adr & 0x80) data_adr |= 0xFF00;
         return 0;
     }
 
@@ -137,7 +140,11 @@ byte set_address_mode(byte mode) {
     }
 
     case ADR_INDY: {
-        return 0;
+        low = read(pc++);
+        high = read(pc++);
+        data_adr = (high << 8) | low;
+        data_adr += y;
+        return ((data_adr & 0xFF00) != (high << 8));
     }
 
     case ADR_INDABS: {
