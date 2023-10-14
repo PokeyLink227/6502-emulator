@@ -419,7 +419,7 @@ byte execute_instr(byte instr) {
 }
 
 void disp_cpu() {
-    printf("acc:[%02X]  x:[%02X]  y:[%02X]  stkptr:[%02X]  pc:[%04X]  status:[N:%c V:%c - B:%c D:%c I:%c Z:%c C:%c]\r",
+    printf("acc:[%02X]  x:[%02X]  y:[%02X]  stkptr:[%02X]  pc:[%04X]  status:[N:%c V:%c - B:%c D:%c I:%c Z:%c C:%c]\n",
         acc, x, y, stkptr, pc,
         status & NEGATIVE ? '1' : '0',
         status & OVERFLOW ? '1' : '0',
@@ -432,24 +432,27 @@ void disp_cpu() {
 }
 
 byte reset_cpu() {
-    acc = 0;
+    acc = 0x17;
     x = 0;
     y = 0;
 }
 
 int main(int argc, char **argv) {
+    memory[0] = 0xAA;
     pc = 0;
     stkptr = 0;
     status = UNUSED;
-    cur_instr = opcode_lookup[0xBA];
-    printf("%s\n", mnemonics[cur_instr.opcode]);
 
     reset_cpu();
+    disp_cpu();
 
-    for (int i = 0; i < 100000; i++) {
-        acc++;
-        disp_cpu();
-    }
+    cur_instr = opcode_lookup[read(pc++)];
+    printf("%s\n", mnemonics[cur_instr.opcode]);
+    set_address_mode(cur_instr.addr_mode);
+    execute_instr(cur_instr.opcode);
+
+    disp_cpu();
+
 
     return 0;
 }
