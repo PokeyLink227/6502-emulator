@@ -553,6 +553,7 @@ byte execute_instr(byte instr) {
     }
 
     case OP_SED: {
+        printf("dont do this\n");
         set_flag(DECIMALMODE, 1);
         return 0;
     }
