@@ -180,10 +180,11 @@ byte set_address_mode(byte mode) {
 byte execute_instr(byte instr) {
     switch (instr) {
     case OP_ADC: {
+        if (get_flag(DECIMALMODE)) printf("AHHHHHHHH I CANT DO THIS\n");
         unsigned short sum = acc + read(data_adr) + get_flag(CARRY);
 
         set_flag(OVERFLOW, (~(acc ^ read(data_adr)) & (acc ^ (byte)sum)) & 0x0080);
-        set_flag(CARRY, sum & 0x0100);
+        set_flag(CARRY, sum > 0xFF);
         set_flag(ZERO, sum == 0x00);
         set_flag(NEGATIVE, sum & 0x80);
 
