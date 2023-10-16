@@ -28,7 +28,7 @@ Instr opcode_lookup[0x100] = {
 
 unsigned short pc;
 byte acc, x, y, stkptr, status;
-byte memory[0x10000];
+byte ram[0x0800];
 
 Instr cur_instr;
 unsigned short data_adr;
@@ -48,16 +48,19 @@ byte get_flag(byte flag) {
 }
 
 byte read(unsigned short adr) {
-    if (adr >= 0x0000 && adr <= 0xFFFF) {
-        return memory[adr];
-    } else {
-        return 0x00;
+    if (adr < 0x2000) {
+        /*read ram*/
+        return ram[adr % 0x0800]; /* could be optimized if deemed necessary*/
+    } else if (adr < 0x4000) {
+        /* read PPU registers   (adr - 0x2000) % 0x0008 + 0x2000*/
+    } else if (adr < 0x4018) {
     }
+    return 0x00;
 }
 
 byte write(unsigned short adr, byte data) {
     if (adr >= 0x0000 && adr <= 0xFFFF) {
-        memory[adr] = data;
+        ram[adr] = data;
         return 0x01;
     } else {
         return 0x00;
@@ -622,7 +625,7 @@ void disp_cpu() {
         status & ZERO ? '1' : '0',
         status & CARRY ? '1' : '0'
     );
-    for (int i = 0; i < 0xFF; i++) printf("%02X ", memory[i]);
+    for (int i = 0; i < 0xFF; i++) printf("%02X ", ram[i]);
     printf("\n");
 }
 
@@ -639,35 +642,35 @@ int main(int argc, char **argv) {
     byte extra_cycle;
     // sample fib generator
     // 1: LDA 0x01
-    memory[0x200] = 0xA9;
-    memory[0x201] = 0x01;
+    ram[0x200] = 0xA9;
+    ram[0x201] = 0x01;
     // 2: STA ZP 0x01
-    memory[0x202] = 0x85;
-    memory[0x203] = 0x01;
+    ram[0x202] = 0x85;
+    ram[0x203] = 0x01;
     // 3: LDX 0x01
-    memory[0x204] = 0xA2;
-    memory[0x205] = 0x01;
+    ram[0x204] = 0xA2;
+    ram[0x205] = 0x01;
     // 4: LDA ZPX 0xFF
-    memory[0x206] = 0xB5;
-    memory[0x207] = 0xFF;
+    ram[0x206] = 0xB5;
+    ram[0x207] = 0xFF;
     // 5: ADC ZPX 0x00
-    memory[0x208] = 0x75;
-    memory[0x209] = 0x00;
+    ram[0x208] = 0x75;
+    ram[0x209] = 0x00;
     // 6: BMI 0x20
-    memory[0x20A] = 0x30;
-    memory[0x20B] = 0x06;
+    ram[0x20A] = 0x30;
+    ram[0x20B] = 0x06;
     // 7: STA ZPX 0x01
-    memory[0x20C] = 0x95;
-    memory[0x20D] = 0x01;
+    ram[0x20C] = 0x95;
+    ram[0x20D] = 0x01;
     // 8: INX
-    memory[0x20E] = 0xE8;
+    ram[0x20E] = 0xE8;
     // 9: JMP 4
-    memory[0x20F] = 0x4C;
-    memory[0x210] = 0x06;
-    memory[0x211] = 0x02;
+    ram[0x20F] = 0x4C;
+    ram[0x210] = 0x06;
+    ram[0x211] = 0x02;
     //10: STA ZPX 0x01
-    memory[0x212] = 0x95;
-    memory[0x213] = 0x01;
+    ram[0x212] = 0x95;
+    ram[0x213] = 0x01;
 
 
 
