@@ -32,8 +32,9 @@ byte memory[0x10000];
 
 Instr cur_instr;
 unsigned short data_adr;
+byte cycles;
 
-void set_flag(byte flag, byte b) {
+void set_flag(byte flag, unsigned short b) {
     if (b) {
         status |= flag;
     } else {
@@ -43,7 +44,7 @@ void set_flag(byte flag, byte b) {
 }
 
 byte get_flag(byte flag) {
-    return status & flag;
+    return (status & flag) != 0;
 }
 
 byte read(unsigned short adr) {
@@ -176,202 +177,394 @@ byte set_address_mode(byte mode) {
 byte execute_instr(byte instr) {
     switch (instr) {
     case OP_ADC: {
-        return 0;
+        unsigned short sum = acc + read(data_adr) + get_flag(CARRY);
+
+        set_flag(OVERFLOW, (~(acc ^ read(data_adr)) & (acc ^ (byte)sum)) & 0x0080);
+        set_flag(CARRY, sum & 0x0100);
+        set_flag(ZERO, sum == 0x00);
+        set_flag(NEGATIVE, sum & 0x80);
+
+        acc = sum & 0x00FF;
+        return 1;
     }
 
     case OP_AND: {
-        return 0;
+        acc &= read(data_adr);
+        set_flag(ZERO, acc == 0x00);
+        set_flag(NEGATIVE, acc & 0x80);
+        return 1;
     }
 
     case OP_ASL: {
+        if (cur_instr.addr_mode == ADR_ACC) {
+            set_flag(CARRY, acc & 0x80);
+            acc <<= 1;
+            set_flag(ZERO, acc == 0x00);
+            set_flag(NEGATIVE, acc & 0x80);
+        } else {
+            byte temp = read(data_adr);
+            set_flag(CARRY, temp & 0x80);
+            temp <<= 1;
+            set_flag(ZERO, temp == 0x00);
+            set_flag(NEGATIVE, temp & 0x80);
+        }
         return 0;
     }
 
     case OP_BCC: {
+        if (!get_flag(CARRY)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
     case OP_BCS: {
+        if (get_flag(CARRY)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
     case OP_BEQ: {
+        if (get_flag(ZERO)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
     case OP_BIT: {
+        byte temp = read(data_adr);
+        set_flag(ZERO, (temp & acc) == 0);
+        set_flag(OVERFLOW, temp & 0x40);
+        set_flag(NEGATIVE, temp & 0x80);
         return 0;
     }
 
     case OP_BMI: {
+        if (get_flag(NEGATIVE)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
     case OP_BNE: {
+        if (!get_flag(ZERO)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
     case OP_BPL: {
+        if (!get_flag(NEGATIVE)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
-    case OP_BRK: {
+    case OP_BRK: { /* NEED TO IMPLEMENT */
+        set_flag(BRKCOMMAND, 1);
         return 0;
     }
 
     case OP_BVC: {
+        if (!get_flag(OVERFLOW)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
     case OP_BVS: {
+        if (get_flag(OVERFLOW)) {
+            cycles++;
+            if ((pc & 0xFF00) != ((pc + data_adr) & 0xFF00)) cycles++;
+            pc += data_adr;
+        }
         return 0;
     }
 
     case OP_CLC: {
+        status &= ~CARRY;
         return 0;
     }
 
     case OP_CLD: {
+        status &= ~DECIMALMODE;
         return 0;
     }
 
     case OP_CLI: {
+        status &= ~IRQDISABLE;
         return 0;
     }
 
     case OP_CLV: {
+        status &= ~OVERFLOW;
         return 0;
     }
 
     case OP_CMP: {
+        unsigned short temp = acc - read(data_adr);
+        set_flag(CARRY, acc >= read(data_adr));
+        set_flag(NEGATIVE, temp & 0x80);
+        set_flag(ZERO, temp == 0);
         return 0;
     }
 
     case OP_CPX: {
+        unsigned short temp = x - read(data_adr);
+        set_flag(CARRY, x >= read(data_adr));
+        set_flag(NEGATIVE, temp & 0x80);
+        set_flag(ZERO, temp == 0);
         return 0;
     }
 
     case OP_CPY: {
+        unsigned short temp = y - read(data_adr);
+        set_flag(CARRY, y >= read(data_adr));
+        set_flag(NEGATIVE, temp & 0x80);
+        set_flag(ZERO, temp == 0);
         return 0;
     }
 
     case OP_DEC: {
+        byte temp = read(data_adr);
+        temp -= 1;
+        write(data_adr, temp);
+        set_flag(ZERO, temp == 0x00);
+        set_flag(NEGATIVE, temp & 0x80);
         return 0;
     }
 
     case OP_DEX: {
+        x -= 1;
+        set_flag(ZERO, x == 0x00);
+        set_flag(NEGATIVE, x & 0x80);
         return 0;
     }
 
     case OP_DEY: {
+        y -= 1;
+        set_flag(ZERO, y == 0x00);
+        set_flag(NEGATIVE, y & 0x80);
         return 0;
     }
 
     case OP_EOR: {
-        return 0;
+        acc ^= read(data_adr);
+        set_flag(ZERO, acc == 0x00);
+        set_flag(NEGATIVE, acc & 0x80);
+        return 1;
     }
 
     case OP_INC: {
+        byte temp = read(data_adr);
+        temp += 1;
+        write(data_adr, temp);
+        set_flag(ZERO, temp == 0x00);
+        set_flag(NEGATIVE, temp & 0x80);
         return 0;
     }
 
     case OP_INX: {
+        x += 1;
+        set_flag(ZERO, x == 0x00);
+        set_flag(NEGATIVE, x & 0x80);
         return 0;
     }
 
     case OP_INY: {
+        y -= 1;
+        set_flag(ZERO, y == 0x00);
+        set_flag(NEGATIVE, y & 0x80);
         return 0;
     }
 
     case OP_JMP: {
+        pc = data_adr;
         return 0;
     }
 
     case OP_JSR: {
+        pc--;
+        write(0x0100 + stkptr, (pc >> 8) & 0x00FF);
+        stkptr--;
+        write(0x0100 + stkptr, pc & 0x00FF);
+        stkptr--;
+        pc = data_adr;
         return 0;
     }
 
     case OP_LDA: {
+        acc = read(data_adr);
+        set_flag(ZERO, acc == 0x00);
+        set_flag(NEGATIVE, acc & 0x80);
         return 0;
     }
 
     case OP_LDX: {
+        x = read(data_adr);
+        set_flag(ZERO, x == 0x00);
+        set_flag(NEGATIVE, x & 0x80);
         return 0;
     }
 
     case OP_LDY: {
+        y = read(data_adr);
+        set_flag(ZERO, y == 0x00);
+        set_flag(NEGATIVE, y & 0x80);
         return 0;
     }
 
     case OP_LSR: {
+        if (cur_instr.addr_mode == ADR_ACC) {
+            set_flag(CARRY, acc & 0x80);
+            acc >>= 1;
+            set_flag(ZERO, acc == 0x00);
+            set_flag(NEGATIVE, acc & 0x80);
+        } else {
+            byte temp = read(data_adr);
+            set_flag(CARRY, temp & 0x01);
+            temp >>= 1;
+            set_flag(ZERO, temp == 0x00);
+            set_flag(NEGATIVE, 0);
+        }
         return 0;
     }
 
     case OP_NOP: {
+        /*implement unofficial NOP's in lookup table*/
         return 0;
     }
 
     case OP_ORA: {
+        acc |= read(data_adr);
+        set_flag(ZERO, acc == 0x00);
+        set_flag(NEGATIVE, acc & 0x80);
         return 0;
     }
 
     case OP_PHA: {
+        write(0x0100 | stkptr, acc);
+        stkptr--;
         return 0;
     }
 
     case OP_PHP: {
+        write(0x0100 | stkptr, status);
+        stkptr--;
         return 0;
     }
 
     case OP_PLA: {
+        stkptr++;
+        acc = read(0x0100 | stkptr);
         return 0;
     }
 
     case OP_PLP: {
+        stkptr++;
+        status = read(0x0100 | stkptr);
         return 0;
     }
 
     case OP_ROL: {
+        byte temp;
+        if (cur_instr.addr_mode == ADR_ACC) {
+            temp = acc << 1;
+            if (get_flag(CARRY)) temp |= 0x01;
+            set_flag(CARRY, acc & 0x80);
+            acc = temp;
+        }
+        else {
+            temp = read(data_adr) << 1;
+            if (get_flag(CARRY)) temp |= 0x01;
+            set_flag(CARRY, read(data_adr) & 0x80);
+            write(data_adr, temp);
+        }
+        set_flag(ZERO, temp == 0x00);
+        set_flag(NEGATIVE, temp & 0x80);
         return 0;
     }
 
     case OP_ROR: {
+        byte temp;
+        if (cur_instr.addr_mode == ADR_ACC) {
+            temp = acc >> 1;
+            if (get_flag(CARRY)) temp |= 0x80;
+            set_flag(CARRY, acc & 0x01);
+            acc = temp;
+        }
+        else {
+            temp = read(data_adr) >> 1;
+            if (get_flag(CARRY)) temp |= 0x80;
+            set_flag(CARRY, read(data_adr) & 0x01);
+            write(data_adr, temp);
+        }
+        set_flag(ZERO, temp == 0x00);
+        set_flag(NEGATIVE, temp & 0x80);
         return 0;
     }
 
     case OP_RTI: {
+        status = read(++stkptr);
+        pc = read(++stkptr);
+        pc |= (read(++stkptr) << 8) & 0xFF00;
         return 0;
     }
 
     case OP_RTS: {
+        pc = read(++stkptr);
+        pc |= (read(++stkptr) << 8) & 0xFF00;
+
+        pc++;
         return 0;
     }
 
-    case OP_SBC: {
+    case OP_SBC: { /* NEED TO IMPLEMENT */
         return 0;
     }
 
     case OP_SEC: {
+        set_flag(CARRY, 1);
         return 0;
     }
 
     case OP_SED: {
+        set_flag(DECIMALMODE, 1);
         return 0;
     }
 
     case OP_SEI: {
+        set_flag(IRQDISABLE, 1);
         return 0;
     }
 
     case OP_STA: {
+        write(data_adr, acc);
         return 0;
     }
 
     case OP_STX: {
+        write(data_adr, x);
         return 0;
     }
 
     case OP_STY: {
+        write(data_adr, y);
         return 0;
     }
 
@@ -429,27 +622,67 @@ void disp_cpu() {
         status & ZERO ? '1' : '0',
         status & CARRY ? '1' : '0'
     );
+    for (int i = 0; i < 0xFF; i++) printf("%02X ", memory[i]);
+    printf("\n");
 }
 
 byte reset_cpu() {
-    acc = 0x17;
-    x = 0;
-    y = 0;
+    acc = 0x00;
+    x = 0x00;
+    y = 0x00;
+    stkptr = 0xFF;
+    pc = 0x200;
+    status = UNUSED;
 }
 
 int main(int argc, char **argv) {
-    memory[0] = 0xAA;
-    pc = 0;
-    stkptr = 0;
-    status = UNUSED;
+    byte extra_cycle;
+    // sample fib generator
+    // 1: LDA 0x01
+    memory[0x200] = 0xA9;
+    memory[0x201] = 0x01;
+    // 2: STA ZP 0x01
+    memory[0x202] = 0x85;
+    memory[0x203] = 0x01;
+    // 3: LDX 0x01
+    memory[0x204] = 0xA2;
+    memory[0x205] = 0x01;
+    // 4: LDA ZPX 0xFF
+    memory[0x206] = 0xB5;
+    memory[0x207] = 0xFF;
+    // 5: ADC ZPX 0x00
+    memory[0x208] = 0x75;
+    memory[0x209] = 0x00;
+    // 6: BMI 0x20
+    memory[0x20A] = 0x30;
+    memory[0x20B] = 0x06;
+    // 7: STA ZPX 0x01
+    memory[0x20C] = 0x95;
+    memory[0x20D] = 0x01;
+    // 8: INX
+    memory[0x20E] = 0xE8;
+    // 9: JMP 4
+    memory[0x20F] = 0x4C;
+    memory[0x210] = 0x06;
+    memory[0x211] = 0x02;
+    //10: STA ZPX 0x01
+    memory[0x212] = 0x95;
+    memory[0x213] = 0x01;
+
+
+
 
     reset_cpu();
     disp_cpu();
 
-    cur_instr = opcode_lookup[read(pc++)];
-    printf("%s\n", mnemonics[cur_instr.opcode]);
-    set_address_mode(cur_instr.addr_mode);
-    execute_instr(cur_instr.opcode);
+    while (cur_instr.opcode != OP_BRK) {
+        cur_instr = opcode_lookup[read(pc++)];
+        cycles = cur_instr.cycles;
+        printf("%s\n", mnemonics[cur_instr.opcode]);
+        extra_cycle = set_address_mode(cur_instr.addr_mode);
+        extra_cycle &= execute_instr(cur_instr.opcode);
+        if (extra_cycle) cycles++;
+    }
 
     disp_cpu();
 
