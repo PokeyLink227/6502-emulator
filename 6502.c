@@ -276,7 +276,14 @@ byte execute_instr(byte instr) {
         return 0;
     }
 
-    case OP_BRK: { /* NEED TO IMPLEMENT */
+    case OP_BRK: {
+        write(0x0100 + stkptr--, (pc >> 8) & 0x00FF);
+        write(0x0100 + stkptr--, pc & 0x00FF);
+        write(0x0100 + stkptr--, status);
+
+        pc = read(0xFFFE);
+        pc |= (read(0xFFFF) << 8) & 0xFF00;
+
         set_flag(BRKCOMMAND, 1);
         return 0;
     }
@@ -403,10 +410,8 @@ byte execute_instr(byte instr) {
 
     case OP_JSR: {
         pc--;
-        write(0x0100 + stkptr, (pc >> 8) & 0x00FF);
-        stkptr--;
-        write(0x0100 + stkptr, pc & 0x00FF);
-        stkptr--;
+        write(0x0100 + stkptr--, (pc >> 8) & 0x00FF);
+        write(0x0100 + stkptr--, pc & 0x00FF);
         pc = data_adr;
         return 0;
     }
