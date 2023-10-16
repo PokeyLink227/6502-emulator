@@ -59,12 +59,15 @@ byte read(unsigned short adr) {
 }
 
 byte write(unsigned short adr, byte data) {
-    if (adr >= 0x0000 && adr <= 0xFFFF) {
-        ram[adr] = data;
+    if (adr < 0x2000) {
+        /*write to ram*/
+        ram[adr % 0x0800] = data;
         return 0x01;
-    } else {
-        return 0x00;
+    } else if (adr < 0x4000) {
+        /* write to PPU registers   (adr - 0x2000) % 0x0008 + 0x2000*/
+    } else if (adr < 0x4018) {
     }
+    return 0x00;
 }
 
 byte set_address_mode(byte mode) {
@@ -543,7 +546,18 @@ byte execute_instr(byte instr) {
         return 0;
     }
 
-    case OP_SBC: { /* NEED TO IMPLEMENT */
+    case OP_SBC: {
+        /*
+        unsigned short temp = acc - read(data_adr) - (1 - get_flag(CARRY));
+        unsigned short temp = acc + (~read(data_adr) + 1) - 1 + get_flag(CARRY);
+        */
+        unsigned short temp = acc + ~read(data_adr) + get_flag(CARRY);
+
+        set_flag(CARRY, !(temp & 0xFF00));
+        set_flag(ZERO, temp & 0x00FF == 0x00);
+        set_flag(OVERFLOW, ((acc ^ read(data_adr)) & (acc ^ temp)) & 0x0080);
+        set_flag(NEGATIVE, temp & 0x80);
+        acc = temp & 0x00FF;
         return 0;
     }
 
