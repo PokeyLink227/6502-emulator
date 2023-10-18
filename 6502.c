@@ -8,22 +8,22 @@ typedef struct instruction {
 } Instr;
 
 Instr opcode_lookup[0x100] = {
-    {OP_BRK, ADR_IMPL  , 7}, {OP_ORA, ADR_INDX  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_ORA, ADR_ZP    , 3}, {OP_ASL, ADR_ZP    , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_PHP, ADR_IMPL  , 3}, {OP_ORA, ADR_IMM   , 2}, {OP_ASL, ADR_ACC   , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_ORA, ADR_ABS   , 4}, {OP_ASL, ADR_ABS   , 6}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BPL, ADR_REL   , 2}, {OP_ORA, ADR_INDY  , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_ORA, ADR_ZPX   , 4}, {OP_ASL, ADR_ZPX   , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_CLC, ADR_IMPL  , 2}, {OP_ORA, ADR_ABSY  , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_ORA, ADR_ABSX  , 4}, {OP_ASL, ADR_ABSX  , 7}, {OP_XXX, ADR_NONE  , 1},
-    {OP_JSR, ADR_ABS   , 6}, {OP_AND, ADR_INDX  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_BIT, ADR_ZP    , 3}, {OP_AND, ADR_ZP    , 3}, {OP_ROL, ADR_ZP    , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_PLP, ADR_IMPL  , 4}, {OP_AND, ADR_IMM   , 2}, {OP_ROL, ADR_ACC   , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_BIT, ADR_ABS   , 4}, {OP_AND, ADR_ABS   , 4}, {OP_ROL, ADR_ABS   , 6}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BMI, ADR_REL   , 2}, {OP_AND, ADR_INDY  , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_AND, ADR_ZPX   , 4}, {OP_ROL, ADR_ZPX   , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_SEC, ADR_IMPL  , 2}, {OP_AND, ADR_ABSY  , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_AND, ADR_ABSX  , 4}, {OP_ROL, ADR_ABSX  , 7}, {OP_XXX, ADR_NONE  , 1},
-    {OP_RTI, ADR_IMPL  , 6}, {OP_EOR, ADR_INDX  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_EOR, ADR_ZP    , 3}, {OP_LSR, ADR_ZP    , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_PHA, ADR_IMPL  , 3}, {OP_EOR, ADR_IMM   , 2}, {OP_LSR, ADR_ACC   , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_JMP, ADR_ABS   , 3}, {OP_EOR, ADR_ABS   , 4}, {OP_LSR, ADR_ABS   , 6}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BVC, ADR_REL   , 2}, {OP_EOR, ADR_INDY  , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_EOR, ADR_ZPX   , 4}, {OP_LSR, ADR_ZPX   , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_CLI, ADR_IMPL  , 2}, {OP_EOR, ADR_ABSY  , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_EOR, ADR_ABSX  , 4}, {OP_LSR, ADR_ABSX  , 7}, {OP_XXX, ADR_NONE  , 1},
-    {OP_RTS, ADR_IMPL  , 6}, {OP_ADC, ADR_INDX  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_ADC, ADR_ZP    , 3}, {OP_ROR, ADR_ZP    , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_PLA, ADR_IMPL  , 4}, {OP_ADC, ADR_IMM   , 2}, {OP_ROR, ADR_ACC   , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_JMP, ADR_INDABS, 5}, {OP_ADC, ADR_ABS   , 4}, {OP_ROR, ADR_ABS   , 6}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BVS, ADR_REL   , 2}, {OP_ADC, ADR_INDY  , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_ADC, ADR_ZPX   , 4}, {OP_ROR, ADR_ZPX   , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_SEI, ADR_IMPL  , 2}, {OP_ADC, ADR_ABSY  , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_ADC, ADR_ABSX  , 4}, {OP_ROR, ADR_ABSX  , 7}, {OP_XXX, ADR_NONE  , 1},
-    {OP_XXX, ADR_NONE  , 1}, {OP_STA, ADR_INDX  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_STY, ADR_ZP    , 3}, {OP_STA, ADR_ZP    , 3}, {OP_STX, ADR_ZP    , 3}, {OP_XXX, ADR_NONE  , 1}, {OP_DEY, ADR_IMPL  , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_TXA, ADR_IMPL  , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_STY, ADR_ABS   , 4}, {OP_STA, ADR_ABS   , 4}, {OP_STX, ADR_ABS   , 4}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BCC, ADR_REL   , 2}, {OP_STA, ADR_INDY  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_STY, ADR_ZPX   , 4}, {OP_STA, ADR_ZPX   , 4}, {OP_STX, ADR_ZPX   , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_TYA, ADR_IMPL  , 2}, {OP_STA, ADR_ABSY  , 5}, {OP_TXS, ADR_IMPL  , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_STA, ADR_ABSX  , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1},
-    {OP_LDY, ADR_IMM   , 2}, {OP_LDA, ADR_INDX  , 6}, {OP_LDX, ADR_IMM   , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_LDY, ADR_ZP    , 3}, {OP_LDA, ADR_ZP    , 3}, {OP_LDX, ADR_ZP    , 3}, {OP_XXX, ADR_NONE  , 1}, {OP_TAY, ADR_IMPL  , 2}, {OP_LDA, ADR_IMM   , 2}, {OP_TAX, ADR_IMPL  , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_LDY, ADR_ABS   , 4}, {OP_LDA, ADR_ABS   , 4}, {OP_LDX, ADR_ABS   , 4}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BCS, ADR_REL   , 2}, {OP_LDA, ADR_INDY  , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_LDY, ADR_ZPX   , 3}, {OP_LDA, ADR_ZPX   , 4}, {OP_LDX, ADR_ZPX   , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_CLV, ADR_IMPL  , 2}, {OP_LDA, ADR_ABSY  , 4}, {OP_TSX, ADR_IMPL  , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_LDY, ADR_ABSX  , 4}, {OP_LDA, ADR_ABSX  , 4}, {OP_ADC, ADR_ABSY  , 4}, {OP_XXX, ADR_NONE  , 1},
-    {OP_CPY, ADR_IMM   , 2}, {OP_CMP, ADR_INDX  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_CPY, ADR_ZP    , 3}, {OP_CMP, ADR_ZP    , 3}, {OP_DEC, ADR_ZP    , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_INY, ADR_IMPL  , 2}, {OP_CMP, ADR_IMM   , 2}, {OP_DEX, ADR_IMPL  , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_CPY, ADR_ABS   , 4}, {OP_CMP, ADR_ABS   , 4}, {OP_DEC, ADR_ABS   , 6}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BNE, ADR_REL   , 2}, {OP_CMP, ADR_INDY  , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_CMP, ADR_ZPX   , 4}, {OP_DEC, ADR_ZPX   , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_CLD, ADR_IMPL  , 2}, {OP_CMP, ADR_ABSY  , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_CMP, ADR_ABSX  , 4}, {OP_DEC, ADR_ABSX  , 7}, {OP_XXX, ADR_NONE  , 1},
-    {OP_CPX, ADR_IMM   , 2}, {OP_SBC, ADR_INDX  , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_CPX, ADR_ZP    , 3}, {OP_SBC, ADR_ZP    , 3}, {OP_INC, ADR_ZP    , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_INX, ADR_IMPL  , 2}, {OP_SBC, ADR_IMM   , 2}, {OP_NOP, ADR_IMPL  , 2}, {OP_XXX, ADR_NONE  , 1}, {OP_CPX, ADR_ABS   , 4}, {OP_SBC, ADR_ABS   , 4}, {OP_INC, ADR_ABS   , 6}, {OP_XXX, ADR_NONE  , 1},
-    {OP_BEQ, ADR_REL   , 2}, {OP_SBC, ADR_INDY  , 5}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_SBC, ADR_ZPX   , 4}, {OP_INC, ADR_ZPX   , 6}, {OP_XXX, ADR_NONE  , 1}, {OP_SED, ADR_IMPL  , 2}, {OP_SBC, ADR_ABSY  , 4}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_XXX, ADR_NONE  , 1}, {OP_SBC, ADR_ABSX  , 4}, {OP_INC, ADR_ABSX  , 7}, {OP_XXX, ADR_NONE  , 1}
+    {OP_BRK, ADR_IMP, 7}, {OP_ORA, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ZPG, 3}, {OP_ASL, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PHP, ADR_IMP, 3}, {OP_ORA, ADR_IMM, 2}, {OP_ASL, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ABS, 4}, {OP_ASL, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
+    {OP_BPL, ADR_REL, 2}, {OP_ORA, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ZPX, 4}, {OP_ASL, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_CLC, ADR_IMP, 2}, {OP_ORA, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ABX, 4}, {OP_ASL, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
+    {OP_JSR, ADR_ABS, 6}, {OP_AND, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_BIT, ADR_ZPG, 3}, {OP_AND, ADR_ZPG, 3}, {OP_ROL, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PLP, ADR_IMP, 4}, {OP_AND, ADR_IMM, 2}, {OP_ROL, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_BIT, ADR_ABS, 4}, {OP_AND, ADR_ABS, 4}, {OP_ROL, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
+    {OP_BMI, ADR_REL, 2}, {OP_AND, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_AND, ADR_ZPX, 4}, {OP_ROL, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_SEC, ADR_IMP, 2}, {OP_AND, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_AND, ADR_ABX, 4}, {OP_ROL, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
+    {OP_RTI, ADR_IMP, 6}, {OP_EOR, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_EOR, ADR_ZPG, 3}, {OP_LSR, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PHA, ADR_IMP, 3}, {OP_EOR, ADR_IMM, 2}, {OP_LSR, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_JMP, ADR_ABS, 3}, {OP_EOR, ADR_ABS, 4}, {OP_LSR, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
+    {OP_BVC, ADR_REL, 2}, {OP_EOR, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_EOR, ADR_ZPX, 4}, {OP_LSR, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_CLI, ADR_IMP, 2}, {OP_EOR, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_EOR, ADR_ABX, 4}, {OP_LSR, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
+    {OP_RTS, ADR_IMP, 6}, {OP_ADC, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ADC, ADR_ZPG, 3}, {OP_ROR, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PLA, ADR_IMP, 4}, {OP_ADC, ADR_IMM, 2}, {OP_ROR, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_JMP, ADR_IND, 5}, {OP_ADC, ADR_ABS, 4}, {OP_ROR, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
+    {OP_BVS, ADR_REL, 2}, {OP_ADC, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ADC, ADR_ZPX, 4}, {OP_ROR, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_SEI, ADR_IMP, 2}, {OP_ADC, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ADC, ADR_ABX, 4}, {OP_ROR, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
+    {OP_XXX, ADR_XXX, 1}, {OP_STA, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_STY, ADR_ZPG, 3}, {OP_STA, ADR_ZPG, 3}, {OP_STX, ADR_ZPG, 3}, {OP_XXX, ADR_XXX, 1}, {OP_DEY, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_TXA, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_STY, ADR_ABS, 4}, {OP_STA, ADR_ABS, 4}, {OP_STX, ADR_ABS, 4}, {OP_XXX, ADR_XXX, 1},
+    {OP_BCC, ADR_REL, 2}, {OP_STA, ADR_INY, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_STY, ADR_ZPX, 4}, {OP_STA, ADR_ZPX, 4}, {OP_STX, ADR_ZPY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_TYA, ADR_IMP, 2}, {OP_STA, ADR_ABY, 5}, {OP_TXS, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_STA, ADR_ABX, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1},
+    {OP_LDY, ADR_IMM, 2}, {OP_LDA, ADR_INX, 6}, {OP_LDX, ADR_IMM, 2}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ZPG, 3}, {OP_LDA, ADR_ZPG, 3}, {OP_LDX, ADR_ZPG, 3}, {OP_XXX, ADR_XXX, 1}, {OP_TAY, ADR_IMP, 2}, {OP_LDA, ADR_IMM, 2}, {OP_TAX, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ABS, 4}, {OP_LDA, ADR_ABS, 4}, {OP_LDX, ADR_ABS, 4}, {OP_XXX, ADR_XXX, 1},
+    {OP_BCS, ADR_REL, 2}, {OP_LDA, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ZPX, 3}, {OP_LDA, ADR_ZPX, 4}, {OP_LDX, ADR_ZPY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_CLV, ADR_IMP, 2}, {OP_LDA, ADR_ABY, 4}, {OP_TSX, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ABX, 4}, {OP_LDA, ADR_ABX, 4}, {OP_ADC, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1},
+    {OP_CPY, ADR_IMM, 2}, {OP_CMP, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CPY, ADR_ZPG, 3}, {OP_CMP, ADR_ZPG, 3}, {OP_DEC, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_INY, ADR_IMP, 2}, {OP_CMP, ADR_IMM, 2}, {OP_DEX, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_CPY, ADR_ABS, 4}, {OP_CMP, ADR_ABS, 4}, {OP_DEC, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
+    {OP_BNE, ADR_REL, 2}, {OP_CMP, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CMP, ADR_ZPX, 4}, {OP_DEC, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_CLD, ADR_IMP, 2}, {OP_CMP, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CMP, ADR_ABX, 4}, {OP_DEC, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
+    {OP_CPX, ADR_IMM, 2}, {OP_SBC, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CPX, ADR_ZPG, 3}, {OP_SBC, ADR_ZPG, 3}, {OP_INC, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_INX, ADR_IMP, 2}, {OP_SBC, ADR_IMM, 2}, {OP_NOP, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_CPX, ADR_ABS, 4}, {OP_SBC, ADR_ABS, 4}, {OP_INC, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
+    {OP_BEQ, ADR_REL, 2}, {OP_SBC, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_SBC, ADR_ZPX, 4}, {OP_INC, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_SED, ADR_IMP, 2}, {OP_SBC, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_SBC, ADR_ABX, 4}, {OP_INC, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1}
 };
 
 unsigned short pc;
@@ -73,7 +73,7 @@ byte write(unsigned short adr, byte data) {
 byte set_address_mode(byte mode) {
     unsigned short low, high;
     switch (mode) {
-    case ADR_NONE: {
+    case ADR_XXX: {
         return 0;
     }
 
@@ -86,7 +86,7 @@ byte set_address_mode(byte mode) {
         return 0;
     }
 
-    case ADR_ZP: {
+    case ADR_ZPG: {
         data_adr = read(pc++);
         return 0;
     }
@@ -108,7 +108,7 @@ byte set_address_mode(byte mode) {
         return 0;
     }
 
-    case ADR_ABSX: {
+    case ADR_ABX: {
         low = read(pc++);
         high = read(pc++);
         data_adr = (high << 8) | low;
@@ -117,7 +117,7 @@ byte set_address_mode(byte mode) {
         return ((data_adr & 0xFF00) != (high << 8));
     }
 
-    case ADR_ABSY: {
+    case ADR_ABY: {
         low = read(pc++);
         high = read(pc++);
         data_adr = (high << 8) | low;
@@ -125,7 +125,7 @@ byte set_address_mode(byte mode) {
         return ((data_adr & 0xFF00) != (high << 8));
     }
 
-    case ADR_IMPL: {
+    case ADR_IMP: {
         return 0;
     }
 
@@ -135,7 +135,7 @@ byte set_address_mode(byte mode) {
         return 0;
     }
 
-    case ADR_INDX: {
+    case ADR_INX: {
         low = read(pc++);
         low = (low + x) & 0x00FF;
         data_adr = low;
@@ -146,7 +146,7 @@ byte set_address_mode(byte mode) {
         return 0;
     }
 
-    case ADR_INDY: {
+    case ADR_INY: {
         low = read(pc++);
         high = read(pc++);
         data_adr = (high << 8) | low;
@@ -154,7 +154,7 @@ byte set_address_mode(byte mode) {
         return ((data_adr & 0xFF00) != (high << 8));
     }
 
-    case ADR_INDABS: {
+    case ADR_IND: {
         low = read(pc++);
         high = read(pc++);
         data_adr = (high << 8) | low;

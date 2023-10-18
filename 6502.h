@@ -10,20 +10,20 @@ enum status_flags {
 };
 
 enum addr_mode {
-    ADR_NONE,
+    ADR_XXX,
     ADR_ACC,
     ADR_IMM,
-    ADR_ZP,
+    ADR_ZPG,
     ADR_ZPX,
     ADR_ZPY,
     ADR_ABS,
-    ADR_ABSX,
-    ADR_ABSY,
-    ADR_IMPL,
+    ADR_ABX,
+    ADR_ABY,
+    ADR_IMP,
     ADR_REL,
-    ADR_INDX,
-    ADR_INDY,
-    ADR_INDABS
+    ADR_INX,
+    ADR_INY,
+    ADR_IND
 };
 
 enum opcode {
