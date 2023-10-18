@@ -661,6 +661,7 @@ byte reset_cpu() {
 
 int main(int argc, char **argv) {
     byte extra_cycle;
+    /*
     // sample fib generator
     // 1: LDA 0x01
     ram[0x200] = 0xA9;
@@ -692,8 +693,10 @@ int main(int argc, char **argv) {
     //10: STA ZPX 0x01
     ram[0x212] = 0x95;
     ram[0x213] = 0x01;
-
-
+    */
+    FILE *fp = fopen("prog.nes", "rb");
+    fread(ram + 0x200, 1, 20, fp);
+    fclose (fp);
 
 
     reset_cpu();
