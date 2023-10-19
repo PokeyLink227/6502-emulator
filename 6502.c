@@ -1,34 +1,9 @@
 #include <stdio.h>
 #include "6502.h"
 
-typedef unsigned char byte;
-
-typedef struct instruction {
-    byte opcode, addr_mode, cycles;
-} Instr;
-
-Instr opcode_lookup[0x100] = {
-    {OP_BRK, ADR_IMP, 7}, {OP_ORA, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ZPG, 3}, {OP_ASL, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PHP, ADR_IMP, 3}, {OP_ORA, ADR_IMM, 2}, {OP_ASL, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ABS, 4}, {OP_ASL, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
-    {OP_BPL, ADR_REL, 2}, {OP_ORA, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ZPX, 4}, {OP_ASL, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_CLC, ADR_IMP, 2}, {OP_ORA, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ORA, ADR_ABX, 4}, {OP_ASL, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
-    {OP_JSR, ADR_ABS, 6}, {OP_AND, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_BIT, ADR_ZPG, 3}, {OP_AND, ADR_ZPG, 3}, {OP_ROL, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PLP, ADR_IMP, 4}, {OP_AND, ADR_IMM, 2}, {OP_ROL, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_BIT, ADR_ABS, 4}, {OP_AND, ADR_ABS, 4}, {OP_ROL, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
-    {OP_BMI, ADR_REL, 2}, {OP_AND, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_AND, ADR_ZPX, 4}, {OP_ROL, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_SEC, ADR_IMP, 2}, {OP_AND, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_AND, ADR_ABX, 4}, {OP_ROL, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
-    {OP_RTI, ADR_IMP, 6}, {OP_EOR, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_EOR, ADR_ZPG, 3}, {OP_LSR, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PHA, ADR_IMP, 3}, {OP_EOR, ADR_IMM, 2}, {OP_LSR, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_JMP, ADR_ABS, 3}, {OP_EOR, ADR_ABS, 4}, {OP_LSR, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
-    {OP_BVC, ADR_REL, 2}, {OP_EOR, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_EOR, ADR_ZPX, 4}, {OP_LSR, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_CLI, ADR_IMP, 2}, {OP_EOR, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_EOR, ADR_ABX, 4}, {OP_LSR, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
-    {OP_RTS, ADR_IMP, 6}, {OP_ADC, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ADC, ADR_ZPG, 3}, {OP_ROR, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_PLA, ADR_IMP, 4}, {OP_ADC, ADR_IMM, 2}, {OP_ROR, ADR_ACC, 2}, {OP_XXX, ADR_XXX, 1}, {OP_JMP, ADR_IND, 5}, {OP_ADC, ADR_ABS, 4}, {OP_ROR, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
-    {OP_BVS, ADR_REL, 2}, {OP_ADC, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ADC, ADR_ZPX, 4}, {OP_ROR, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_SEI, ADR_IMP, 2}, {OP_ADC, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_ADC, ADR_ABX, 4}, {OP_ROR, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
-    {OP_XXX, ADR_XXX, 1}, {OP_STA, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_STY, ADR_ZPG, 3}, {OP_STA, ADR_ZPG, 3}, {OP_STX, ADR_ZPG, 3}, {OP_XXX, ADR_XXX, 1}, {OP_DEY, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_TXA, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_STY, ADR_ABS, 4}, {OP_STA, ADR_ABS, 4}, {OP_STX, ADR_ABS, 4}, {OP_XXX, ADR_XXX, 1},
-    {OP_BCC, ADR_REL, 2}, {OP_STA, ADR_INY, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_STY, ADR_ZPX, 4}, {OP_STA, ADR_ZPX, 4}, {OP_STX, ADR_ZPY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_TYA, ADR_IMP, 2}, {OP_STA, ADR_ABY, 5}, {OP_TXS, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_STA, ADR_ABX, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1},
-    {OP_LDY, ADR_IMM, 2}, {OP_LDA, ADR_INX, 6}, {OP_LDX, ADR_IMM, 2}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ZPG, 3}, {OP_LDA, ADR_ZPG, 3}, {OP_LDX, ADR_ZPG, 3}, {OP_XXX, ADR_XXX, 1}, {OP_TAY, ADR_IMP, 2}, {OP_LDA, ADR_IMM, 2}, {OP_TAX, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ABS, 4}, {OP_LDA, ADR_ABS, 4}, {OP_LDX, ADR_ABS, 4}, {OP_XXX, ADR_XXX, 1},
-    {OP_BCS, ADR_REL, 2}, {OP_LDA, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ZPX, 3}, {OP_LDA, ADR_ZPX, 4}, {OP_LDX, ADR_ZPY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_CLV, ADR_IMP, 2}, {OP_LDA, ADR_ABY, 4}, {OP_TSX, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_LDY, ADR_ABX, 4}, {OP_LDA, ADR_ABX, 4}, {OP_ADC, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1},
-    {OP_CPY, ADR_IMM, 2}, {OP_CMP, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CPY, ADR_ZPG, 3}, {OP_CMP, ADR_ZPG, 3}, {OP_DEC, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_INY, ADR_IMP, 2}, {OP_CMP, ADR_IMM, 2}, {OP_DEX, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_CPY, ADR_ABS, 4}, {OP_CMP, ADR_ABS, 4}, {OP_DEC, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
-    {OP_BNE, ADR_REL, 2}, {OP_CMP, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CMP, ADR_ZPX, 4}, {OP_DEC, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_CLD, ADR_IMP, 2}, {OP_CMP, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CMP, ADR_ABX, 4}, {OP_DEC, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1},
-    {OP_CPX, ADR_IMM, 2}, {OP_SBC, ADR_INX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_CPX, ADR_ZPG, 3}, {OP_SBC, ADR_ZPG, 3}, {OP_INC, ADR_ZPG, 5}, {OP_XXX, ADR_XXX, 1}, {OP_INX, ADR_IMP, 2}, {OP_SBC, ADR_IMM, 2}, {OP_NOP, ADR_IMP, 2}, {OP_XXX, ADR_XXX, 1}, {OP_CPX, ADR_ABS, 4}, {OP_SBC, ADR_ABS, 4}, {OP_INC, ADR_ABS, 6}, {OP_XXX, ADR_XXX, 1},
-    {OP_BEQ, ADR_REL, 2}, {OP_SBC, ADR_INY, 5}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_SBC, ADR_ZPX, 4}, {OP_INC, ADR_ZPX, 6}, {OP_XXX, ADR_XXX, 1}, {OP_SED, ADR_IMP, 2}, {OP_SBC, ADR_ABY, 4}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_XXX, ADR_XXX, 1}, {OP_SBC, ADR_ABX, 4}, {OP_INC, ADR_ABX, 7}, {OP_XXX, ADR_XXX, 1}
-};
-
 unsigned short pc;
 byte acc, x, y, stkptr, status;
-byte ram[0x0800];
+byte ram[0x10000];
 
 Instr cur_instr;
 unsigned short data_adr;
@@ -650,41 +625,68 @@ void disp_cpu() {
     printf("\n");
 }
 
-byte reset_cpu() {
+void reset_cpu() {
     acc = 0x00;
     x = 0x00;
     y = 0x00;
     stkptr = 0xFF;
-    pc = 0x200;
+    //pc = 0x200;
     status = UNUSED;
 }
 
 byte load_rom(const char *file_name, unsigned short addr) {
-    int ret_size, f_size;
+    int read_size, f_size;
+    struct INES_HEADER header;
     FILE *fp = fopen(file_name, "rb");
     if (!fp) return 0;
 
-    fseek(fp, 0L, SEEK_END);
+    read_size = fread(&header, 1, 16, fp);
+    if (read_size != 16) return 0;
+
+    if (header.ID[0] != 'N' || header.ID[1] != 'E' || header.ID[2] != 'S' || header.ID[3] != 0x1A) return 0;
+
+
+    // read trainer
+    // read PRG ROM
+    // read CHR rom
+    // read INST-rom
+    // read PROM
+
+    /*
+    fseek(fp, 0, SEEK_END);
     f_size = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    fseek(fp, 0, SEEK_SET);
 
     ret_size = fread(ram + addr, 1, f_size, fp);
     if (ret_size != f_size) return 0;
+    */
 
     fclose(fp);
     return 1;
 }
 
 int main(int argc, char **argv) {
-    byte extra_cycle;
+    byte extra_cycle, c;
 
-    load_rom("prog.nes", 0x0200);
-    pc = 0x0200;
+    if (load_rom("nestest.nes", 0x8000)) printf("loaded rom\n");
+    else {
+        printf("failed to load rom\n");
+        return 0;
+    }
+
+    for (int i = 0; i < 0xFF; i++) printf("%02X ", ram[0xC000 + i]);
+
+    pc = 0xC000;
 
     reset_cpu();
     disp_cpu();
 
-    while (cur_instr.opcode != OP_BRK) {
+    while (1) {
+
+        c = getc(stdin);
+        if (c == 'q') break;
+
+
         cur_instr = opcode_lookup[read(pc++)];
         cycles = cur_instr.cycles;
         printf("%s\n", mnemonics[cur_instr.opcode]);
