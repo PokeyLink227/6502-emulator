@@ -659,45 +659,27 @@ byte reset_cpu() {
     status = UNUSED;
 }
 
+byte load_rom(const char *file_name, unsigned short addr) {
+    int ret_size, f_size;
+    FILE *fp = fopen(file_name, "rb");
+    if (!fp) return 0;
+
+    fseek(fp, 0L, SEEK_END);
+    f_size = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+
+    ret_size = fread(ram + addr, 1, f_size, fp);
+    if (ret_size != f_size) return 0;
+
+    fclose(fp);
+    return 1;
+}
+
 int main(int argc, char **argv) {
     byte extra_cycle;
-    /*
-    // sample fib generator
-    // 1: LDA 0x01
-    ram[0x200] = 0xA9;
-    ram[0x201] = 0x01;
-    // 2: STA ZP 0x01
-    ram[0x202] = 0x85;
-    ram[0x203] = 0x01;
-    // 3: LDX 0x01
-    ram[0x204] = 0xA2;
-    ram[0x205] = 0x01;
-    // 4: LDA ZPX 0xFF
-    ram[0x206] = 0xB5;
-    ram[0x207] = 0xFF;
-    // 5: ADC ZPX 0x00
-    ram[0x208] = 0x75;
-    ram[0x209] = 0x00;
-    // 6: BMI 0x20
-    ram[0x20A] = 0x30;
-    ram[0x20B] = 0x06;
-    // 7: STA ZPX 0x01
-    ram[0x20C] = 0x95;
-    ram[0x20D] = 0x01;
-    // 8: INX
-    ram[0x20E] = 0xE8;
-    // 9: JMP 4
-    ram[0x20F] = 0x4C;
-    ram[0x210] = 0x06;
-    ram[0x211] = 0x02;
-    //10: STA ZPX 0x01
-    ram[0x212] = 0x95;
-    ram[0x213] = 0x01;
-    */
-    FILE *fp = fopen("prog.nes", "rb");
-    fread(ram + 0x200, 1, 20, fp);
-    fclose (fp);
 
+    load_rom("prog.nes", 0x0200);
+    pc = 0x0200;
 
     reset_cpu();
     disp_cpu();
