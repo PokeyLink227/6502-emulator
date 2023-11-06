@@ -529,7 +529,7 @@ byte execute_instr(byte instr) {
         word temp = acc + ~read(data_adr) + get_flag(CARRY);
 
         set_flag(CARRY, !(temp & 0xFF00));
-        set_flag(ZERO, temp & 0x00FF == 0x00);
+        set_flag(ZERO, (temp & 0x00FF) == 0x00);
         set_flag(OVERFLOW, ((acc ^ read(data_adr)) & (acc ^ temp)) & 0x0080);
         set_flag(NEGATIVE, temp & 0x80);
         acc = temp & 0x00FF;
