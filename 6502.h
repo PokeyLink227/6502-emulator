@@ -147,6 +147,7 @@ const char mnemonics[57][4] = {
 };
 
 typedef unsigned char byte;
+typedef unsigned short word;
 
 typedef struct instruction {
     byte opcode, addr_mode, cycles;

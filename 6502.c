@@ -1,15 +1,15 @@
 #include <stdio.h>
 #include "6502.h"
 
-unsigned short pc;
+word pc;
 byte acc, x, y, stkptr, status;
 byte ram[0x10000];
 
 Instr cur_instr;
-unsigned short data_adr;
+word data_adr;
 byte cycles;
 
-void set_flag(byte flag, unsigned short b) {
+void set_flag(byte flag, word b) {
     if (b) {
         status |= flag;
     } else {
@@ -22,7 +22,7 @@ byte get_flag(byte flag) {
     return (status & flag) != 0;
 }
 
-byte read(unsigned short adr) {
+byte read(word adr) {
     if (adr < 0x2000) {
         /*read ram*/
         return ram[adr % 0x0800]; /* could be optimized if deemed necessary*/
@@ -33,7 +33,7 @@ byte read(unsigned short adr) {
     return 0x00;
 }
 
-byte write(unsigned short adr, byte data) {
+byte write(word adr, byte data) {
     if (adr < 0x2000) {
         /*write to ram*/
         ram[adr % 0x0800] = data;
@@ -46,7 +46,7 @@ byte write(unsigned short adr, byte data) {
 }
 
 byte set_address_mode(byte mode) {
-    unsigned short low, high;
+    word low, high;
     switch (mode) {
     case ADR_XXX: {
         return 0;
@@ -159,7 +159,7 @@ byte execute_instr(byte instr) {
     switch (instr) {
     case OP_ADC: {
         if (get_flag(DECIMALMODE)) printf("AHHHHHHHH I CANT DO THIS\n");
-        unsigned short sum = acc + read(data_adr) + get_flag(CARRY);
+        word sum = acc + read(data_adr) + get_flag(CARRY);
 
         set_flag(OVERFLOW, (~(acc ^ read(data_adr)) & (acc ^ (byte)sum)) & 0x0080);
         set_flag(CARRY, sum > 0xFF);
@@ -306,7 +306,7 @@ byte execute_instr(byte instr) {
     }
 
     case OP_CMP: {
-        unsigned short temp = acc - read(data_adr);
+        word temp = acc - read(data_adr);
         set_flag(CARRY, acc >= read(data_adr));
         set_flag(NEGATIVE, temp & 0x80);
         set_flag(ZERO, temp == 0);
@@ -314,7 +314,7 @@ byte execute_instr(byte instr) {
     }
 
     case OP_CPX: {
-        unsigned short temp = x - read(data_adr);
+        word temp = x - read(data_adr);
         set_flag(CARRY, x >= read(data_adr));
         set_flag(NEGATIVE, temp & 0x80);
         set_flag(ZERO, temp == 0);
@@ -322,7 +322,7 @@ byte execute_instr(byte instr) {
     }
 
     case OP_CPY: {
-        unsigned short temp = y - read(data_adr);
+        word temp = y - read(data_adr);
         set_flag(CARRY, y >= read(data_adr));
         set_flag(NEGATIVE, temp & 0x80);
         set_flag(ZERO, temp == 0);
@@ -523,10 +523,10 @@ byte execute_instr(byte instr) {
 
     case OP_SBC: {
         /*
-        unsigned short temp = acc - read(data_adr) - (1 - get_flag(CARRY));
-        unsigned short temp = acc + (~read(data_adr) + 1) - 1 + get_flag(CARRY);
+        word temp = acc - read(data_adr) - (1 - get_flag(CARRY));
+        word temp = acc + (~read(data_adr) + 1) - 1 + get_flag(CARRY);
         */
-        unsigned short temp = acc + ~read(data_adr) + get_flag(CARRY);
+        word temp = acc + ~read(data_adr) + get_flag(CARRY);
 
         set_flag(CARRY, !(temp & 0xFF00));
         set_flag(ZERO, temp & 0x00FF == 0x00);
@@ -634,7 +634,7 @@ void reset_cpu() {
     status = UNUSED;
 }
 
-byte load_rom(const char *file_name, unsigned short addr) {
+byte load_rom(const char *file_name, word addr) {
     int read_size, f_size;
     struct INES_HEADER header;
     FILE *fp = fopen(file_name, "rb");
@@ -651,6 +651,11 @@ byte load_rom(const char *file_name, unsigned short addr) {
     // read CHR rom
     // read INST-rom
     // read PROM
+    byte mapper = header.FLAGS[1] & 0x0F;
+    mapper |= (header.FLAGS[0] & 0xF0) >> 4;
+    printf("mapper id: %d\n", mapper);
+    return 0;
+
 
     /*
     fseek(fp, 0, SEEK_END);
@@ -668,7 +673,7 @@ byte load_rom(const char *file_name, unsigned short addr) {
 int main(int argc, char **argv) {
     byte extra_cycle, c;
 
-    if (load_rom("nestest.nes", 0x8000)) printf("loaded rom\n");
+    if (load_rom("PUNCHOUT.nes", 0x8000)) printf("loaded rom\n");
     else {
         printf("failed to load rom\n");
         return 0;
