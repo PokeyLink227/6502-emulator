@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "6502.h"
+#include "color.h"
 
 word pc;
 byte acc, x, y, stkptr, status;
@@ -23,6 +24,11 @@ byte get_flag(byte flag) {
 }
 
 byte read(word adr) {
+
+    return ram[adr];
+
+
+
     if (adr < 0x2000) {
         /*read ram*/
         return ram[adr % 0x0800]; /* could be optimized if deemed necessary*/
@@ -611,18 +617,68 @@ byte execute_instr(byte instr) {
 }
 
 void disp_cpu() {
-    printf("acc:[%02X]  x:[%02X]  y:[%02X]  stkptr:[%02X]  pc:[%04X]  status:[N:%c V:%c - B:%c D:%c I:%c Z:%c C:%c]\n",
-        acc, x, y, stkptr, pc,
-        status & NEGATIVE ? '1' : '0',
-        status & OVERFLOW ? '1' : '0',
-        status & BRKCOMMAND ? '1' : '0',
-        status & DECIMALMODE ? '1' : '0',
-        status & IRQDISABLE ? '1' : '0',
-        status & ZERO ? '1' : '0',
-        status & CARRY ? '1' : '0'
+    printf("\033[H");
+    char line[81];
+    for (int i = 0; i < 80; i++) line[i] = 196;
+
+    line[0] = 218;
+    line[3] = 'C';
+    line[4] = 'P';
+    line[5] = 'U';
+    line[79] = 191;
+    line[80] = '\0';
+    printf("%s\n", line);
+
+    printf("%c  ACC:[ %02X ]  X:[ %02X ]  Y:[ %02X ]  StkPtr:[ %02X ]  Status:[ %s %s %s %s %s %s %s %s ]   %c\n",
+        179,
+        acc, x, y, stkptr,
+        status & NEGATIVE ? "\033[92mN\033[39m" : "\033[91mN\033[39m",
+        status & OVERFLOW ? "\033[92mV\033[39m" : "\033[91mV\033[39m",
+        "\033[92m-\033[39m",
+        status & BRKCOMMAND ? "\033[92mB\033[39m" : "\033[91mB\033[39m",
+        status & DECIMALMODE ? "\033[92mD\033[39m" : "\033[91mD\033[39m",
+        status & IRQDISABLE ? "\033[92mI\033[39m" : "\033[91mI\033[39m",
+        status & ZERO ? "\033[92mZ\033[39m" : "\033[91mZ\033[39m",
+        status & CARRY ? "\033[92mC\033[39m" : "\033[91mC\033[39m",
+        179
     );
-    for (int i = 0; i < 0xFF; i++) printf("%02X ", ram[i]);
+
+    line[0] = 195;
+    line[3] = 196;
+    line[4] = 196;
+    line[5] = 196;
+    line[59] = 194;
+    line[79] = 180;
+    printf("%s\n", line);
+
+    printf("%c >                                                        %c   PC:[ %04X ]     %c\n", 179, 179, pc, 179);
+
+    line[56] = 196;
+    line[59] = 197;
+    printf("%s", line);
+    printf("\033[92m\033[5;11HZERO PAGE\033[39m");
+    printf("\033[5;24HSTACK PAGE");
+    printf("\033[5;38HPAGE 78");
+    printf("\033[5;49HPAGE 23");
     printf("\n");
+
+    //printf("%s\n", line);
+
+    for (int i = 0; i <= 0xF0; i += 0x10) {
+        printf("%c  %02X  %c  ", 179, i, 179);
+        for (int j = 0; j <= 0x0F; j += 0x01) printf("%02X ", ram[i + j]);
+        printf(" %c                   %c\n", 179, 179);
+    }
+
+    for (int i = 1; i < 80; i++) line[i] = 196;
+    line[0] = 192;
+    line[7] = 193;
+    line[59] = 193;
+    line[79] = 217;
+    printf("%s\n", line);
+
+    //for (int i = 0; i < 0xFF; i++) printf("%02X ", ram[i]);
+    printf("\033[4;5H");
 }
 
 void reset_cpu() {
@@ -670,37 +726,57 @@ byte load_rom(const char *file_name, word addr) {
     return 1;
 }
 
+byte load_prog(const char *file_name, word addr) {
+    int read_size, f_size;
+    FILE *fp = fopen(file_name, "rb");
+    if (!fp) return 0;
+
+    fseek(fp, 0, SEEK_END);
+    f_size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    fread(ram + addr, 1, f_size, fp);
+    fclose(fp);
+
+    return 0;
+}
+
 int main(int argc, char **argv) {
     byte extra_cycle, c;
 
-    if (load_rom("PUNCHOUT.nes", 0x8000)) printf("loaded rom\n");
+    init_color();
+    printf("loading\n");
+
+    if (load_prog("prog.nes", 0x0200)) printf("loaded rom\n");
     else {
         printf("failed to load rom\n");
-        return 0;
+        //return 0;
     }
 
-    for (int i = 0; i < 0xFF; i++) printf("%02X ", ram[0xC000 + i]);
 
-    pc = 0xC000;
+
+    pc = 0x0200;
 
     reset_cpu();
+    printf("\033[2J\033[H");
     disp_cpu();
+
 
     while (1) {
 
         c = getc(stdin);
         if (c == 'q') break;
 
-
+        disp_cpu();
         cur_instr = opcode_lookup[read(pc++)];
         cycles = cur_instr.cycles;
-        printf("%s\n", mnemonics[cur_instr.opcode]);
+        printf("%s", mnemonics[cur_instr.opcode]);
         extra_cycle = set_address_mode(cur_instr.addr_mode);
         extra_cycle &= execute_instr(cur_instr.opcode);
         if (extra_cycle) cycles++;
     }
 
-    disp_cpu();
+    printf("\033[2J\033[H");
 
 
     return 0;
